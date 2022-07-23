@@ -29,13 +29,13 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import com.gandiva.glance.MainActivity
 import com.gandiva.glance.R
 import com.gandiva.glance.media.widget.MediaActionHandler.Companion.sendMediaAction
 import com.gandiva.glance.media.widget.manager.MediaWidgetManagerImpl
 import com.gandiva.glance.media.widget.ui.MediaWidgetTheme
 import com.gandiva.glance.media.widget.ui.WidgetTheme
-import com.gandiva.glance.ui.theme.DefaultDimens
 import java.io.Serializable
 
 
@@ -70,17 +70,14 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
     @Composable
     override fun Content() {
 
-        val appDimens = DefaultDimens
-
         val isDarkTheme = currentState(key = PREF_IS_DARK_THEME_KEY) ?: false
-        Log.d("**** Widget", "Content() isDarkTheme $isDarkTheme")
 
         WidgetTheme(darkTheme = isDarkTheme) {
             Box(
                 modifier = GlanceModifier
                     .fillMaxWidth()
                     .fillMaxHeight()
-                    .cornerRadius(16.dp)
+                    .cornerRadius(MediaWidgetTheme.dimens.widgetCardRadius)
                     .background(MediaWidgetTheme.colors.background)
                     .clickable(
                         onClick = actionRunCallback<LaunchAppActionCallback>()
@@ -103,21 +100,10 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                         Box(
                             contentAlignment = Alignment.TopEnd,
                             modifier = GlanceModifier
-                                .padding(16.dp)
+                                .clickable(onClick = sendMediaAction(MediaActionHandler.Command.ToggleTheme))
+                                .padding(MediaWidgetTheme.dimens.contentPadding)
                         ) {
-                            Box(
-                                contentAlignment = Alignment.TopEnd,
-                                modifier = GlanceModifier
-                                    .background(MediaWidgetTheme.colors.background)
-                                    .cornerRadius(16.dp)
-                                    .padding(8.dp)
-                            ) {
-                                ThemeToggleButton(
-                                    isDarkTheme = isDarkTheme,
-                                    onClick = sendMediaAction(MediaActionHandler.Command.ToggleTheme)
-                                )
-
-                            }
+                            ThemeToggleButton(isDarkTheme = isDarkTheme)
                         }
 
                         Box(
@@ -133,14 +119,14 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                                     modifier = GlanceModifier
                                         .width((LocalSize.current.width * .4f))
                                         .height((LocalSize.current.height * .4f))
-                                        .padding(8.dp)
+                                        .padding(MediaWidgetTheme.dimens.contentPadding)
                                 ) {
                                     Image(
                                         provider = AndroidResourceImageProvider(widgetData.albumArt),
                                         contentDescription = "",
                                         modifier = GlanceModifier
                                             .fillMaxSize()
-                                            .cornerRadius(16.dp),
+                                            .cornerRadius(MediaWidgetTheme.dimens.widgetCardRadius),
                                         contentScale = ContentScale.Crop
                                     )
                                 }
@@ -153,21 +139,21 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                                     val playOrPauseIconRes =
                                         if (widgetData.isPlaying) R.drawable.ic_baseline_pause_24 else R.drawable.ic_baseline_play_arrow_24
                                     MediaButton(
-                                        size = 40.dp,
+                                        size = MediaWidgetTheme.dimens.widgetLargeIconSize,
                                         iconResId = playOrPauseIconRes,
                                         contentDescription = "play/pause",
                                         action = sendMediaAction(MediaActionHandler.Command.MediaPlayOrPause)
                                     )
                                     Spacer(modifier = GlanceModifier.size(4.dp))
                                     MediaButton(
-                                        size = 32.dp,
+                                        size = MediaWidgetTheme.dimens.widgetMediumIconSize,
                                         iconResId = R.drawable.ic_baseline_skip_previous_24,
                                         contentDescription = "prev",
                                         action = sendMediaAction(MediaActionHandler.Command.MediaPrev)
                                     )
                                     Spacer(modifier = GlanceModifier.size(4.dp))
                                     MediaButton(
-                                        size = 32.dp,
+                                        size = MediaWidgetTheme.dimens.widgetMediumIconSize,
                                         iconResId = R.drawable.ic_baseline_skip_next_24,
                                         contentDescription = "next",
                                         action = sendMediaAction(MediaActionHandler.Command.MediaNext)
@@ -179,10 +165,13 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                     }
 
 
-                    Spacer(modifier = GlanceModifier.size(16.dp))
-                    Box(modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                    Spacer(modifier = GlanceModifier.size(MediaWidgetTheme.dimens.contentPadding))
+                    Box(
+                        modifier = GlanceModifier.fillMaxWidth()
+                            .padding(horizontal = MediaWidgetTheme.dimens.contentPadding)
+                    ) {
                         ProgressBar(
-                            width = LocalSize.current.width - 32.dp,
+                            width = LocalSize.current.width - MediaWidgetTheme.dimens.contentPadding.times(2),
                             height = 8.dp,
                             widgetData.progress,
                             trackColor = MediaWidgetTheme.colors.secondary,
@@ -191,13 +180,21 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                     }
                     Spacer(modifier = GlanceModifier.size(8.dp))
                     Row(
-                        modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 18.dp).defaultWeight(),
+                        modifier = GlanceModifier.fillMaxWidth()
+                            .padding(horizontal = MediaWidgetTheme.dimens.contentPadding).defaultWeight(),
                     ) {
-                        Text(text = widgetData.currentTime, modifier = GlanceModifier.wrapContentSize().defaultWeight())
+                        Text(
+                            text = widgetData.currentTime,
+                            modifier = GlanceModifier.wrapContentSize().defaultWeight(),
+                            style = TextStyle(color = ColorProvider(MediaWidgetTheme.colors.onBackground))
+                        )
                         Text(
                             text = widgetData.totalTime,
                             modifier = GlanceModifier.wrapContentSize().defaultWeight(),
-                            style = TextStyle(textAlign = TextAlign.End)
+                            style = TextStyle(
+                                textAlign = TextAlign.End,
+                                color = ColorProvider(MediaWidgetTheme.colors.onBackground)
+                            )
                         )
                     }
                 }
@@ -246,12 +243,10 @@ fun ProgressBar(width: Dp, height: Dp, progress: Float, trackColor: Color, progr
         modifier = GlanceModifier
             .width(width)
             .height(height)
-            .cornerRadius(16.dp)
+            .cornerRadius(MediaWidgetTheme.dimens.widgetCardRadius)
             .background(trackColor),
         contentAlignment = Alignment.BottomStart
-
     ) {
-
         Box(
             modifier = GlanceModifier
                 .width(width * progress)
@@ -286,7 +281,7 @@ fun MediaButton(size: Dp, @DrawableRes iconResId: Int, contentDescription: Strin
 }
 
 @Composable
-fun ThemeToggleButton(isDarkTheme: Boolean, onClick: Action) {
+fun ThemeToggleButton(isDarkTheme: Boolean) {
     Image(
         provider = IconImageProvider(
             IconCompat.createWithResource(
@@ -297,7 +292,13 @@ fun ThemeToggleButton(isDarkTheme: Boolean, onClick: Action) {
                 .toIcon(LocalContext.current)
         ),
         contentDescription = "toggle",
-        modifier = GlanceModifier.width(24.dp).height(24.dp).clickable(onClick = onClick)
+        modifier = GlanceModifier
+            .background(MediaWidgetTheme.colors.background)
+            .cornerRadius(MediaWidgetTheme.dimens.widgetCardRadius)
+            .fillMaxSize()
+            .width(MediaWidgetTheme.dimens.widgetLargeIconSize)
+            .height(MediaWidgetTheme.dimens.widgetLargeIconSize)
+            .padding(8.dp)
     )
 }
 

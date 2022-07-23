@@ -10,9 +10,10 @@ interface AppDimen {
     val largeShapeSize: Dp
 
     val contentPadding: Dp
-    val defaultWidgetPadding: Dp
+    val widgetLargeIconSize: Dp
+    val widgetMediumIconSize: Dp
     val defaultWidgetElevation: Dp
-    val defaultWidgetCornerRadius: Dp
+    val widgetCardRadius: Dp
 
     val smallIconSize: Dp
 }
@@ -26,10 +27,12 @@ object DefaultDimens : AppDimen {
         get() = 0.dp
     override val contentPadding: Dp
         get() = 16.dp
-    override val defaultWidgetPadding: Dp
+    override val widgetCardRadius: Dp
         get() = 16.dp
-    override val defaultWidgetCornerRadius: Dp
-        get() = 16.dp
+    override val widgetLargeIconSize: Dp
+        get() = 40.dp
+    override val widgetMediumIconSize: Dp
+        get() = 32.dp
     override val defaultWidgetElevation: Dp
         get() = 6.dp
     override val smallIconSize: Dp
