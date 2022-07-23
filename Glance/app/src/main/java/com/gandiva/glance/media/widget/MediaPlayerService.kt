@@ -1,10 +1,14 @@
 package com.gandiva.glance.media.widget
 
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.os.*
 import android.util.Log
 import androidx.annotation.DrawableRes
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.gandiva.glance.NotificationHelper
 import com.gandiva.glance.R
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,6 +22,7 @@ interface IMediaPlayerService {
     fun next()
     fun prev()
     fun getMediaMetaDataFlow(): MutableSharedFlow<MediaPlayerService.MediaMetaData>
+    fun getCurrentMedia(): MediaPlayerService.MediaMetaData
 }
 
 
@@ -36,14 +41,42 @@ class MediaPlayerService : Service(), IMediaPlayerService {
         fun getMediaPlayerService() = this@MediaPlayerService as IMediaPlayerService
     }
 
+    companion object {
+        private const val NOTIFICATION_ID = 0x1000
+    }
+
+    private val notificationManager: NotificationManagerCompat by lazy {
+        NotificationManagerCompat.from(this.applicationContext)
+    }
+
     private val metaDataChangeFlow = MutableSharedFlow<MediaMetaData>(
         replay = 1,
         extraBufferCapacity = 0,
         BufferOverflow.DROP_OLDEST
     )
 
+    private fun getServiceNotification(channelId: String): Notification {
+        return NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentText(getString(R.string.media_notification_title))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentTitle(getString(R.string.media_notification_desc))
+            .setCategory(Notification.CATEGORY_SERVICE)
+            .setChannelId(channelId)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_DEFAULT)
+            .build()
+    }
+
     override fun onBind(p0: Intent?): IBinder {
+        NotificationHelper.getOrCreateDefaultNotificationChannel(this) { channelId ->
+            startForeground(NOTIFICATION_ID, getServiceNotification(channelId))
+        }
         return MediaPlayerLocalBinder()
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        notificationManager.cancel(NOTIFICATION_ID)
+        return super.onUnbind(intent)
     }
 
     private val mediaSource = MediaSource()
@@ -119,6 +152,8 @@ class MediaPlayerService : Service(), IMediaPlayerService {
     private fun updateMediaMetaData(mediaMetaData: MediaMetaData) = metaDataChangeFlow.tryEmit(mediaMetaData)
 
     override fun getMediaMetaDataFlow() = metaDataChangeFlow
+
+    override fun getCurrentMedia() = mediaSource.getCurrentMedia()
 
     override fun onDestroy() {
         super.onDestroy()

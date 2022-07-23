@@ -7,14 +7,10 @@ import android.os.Bundle
 import android.util.Log
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.updateAll
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MediaWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget
-        get() = MediaWidget(MediaWidgetService.defaultWidgetData())
+        get() = MediaWidget(MediaWidgetManager.defaultWidgetData())
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
@@ -46,14 +42,10 @@ class MediaWidgetReceiver : GlanceAppWidgetReceiver() {
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
 //        MediaWidgetService.start(context)
-
-        CoroutineScope(Dispatchers.Default).launch {
-            MediaWidget(MediaWidgetService.defaultWidgetData()).updateAll(context.applicationContext)
-        }
+//        MediaWidgetManager.bindWithMediaPlayerService(context)
     }
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
-        MediaWidgetService.stop(context)
     }
 }
