@@ -7,6 +7,6 @@
     <string name="media_notification_desc">Use widget to control the media playback</string>
     <string name="widget_loading">Please wait, widget is loading…</string>
     <string name="media_widget_title">Media widget</string>
-    <string name="media_widget_error">Uh oh! It seems like app is not opened.
-        \nClick here to open app</string>
+    <string name="media_widget_error">Uh oh! It seems there is a problem showing widget.\nKindly try resize
+        the widget</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.gandiva.glance.media.widget
+package com.gandiva.glance.media.widget.manager
 
 import android.content.ComponentName
 import android.content.Context
@@ -10,6 +10,10 @@ import androidx.glance.GlanceId
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import com.gandiva.glance.R
+import com.gandiva.glance.media.widget.IMediaPlayerService
+import com.gandiva.glance.media.widget.MediaPlayerService
+import com.gandiva.glance.media.widget.ui.MediaWidget
+import com.gandiva.glance.media.widget.ui.WidgetData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn

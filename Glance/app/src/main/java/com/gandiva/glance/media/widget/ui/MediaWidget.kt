@@ -1,4 +1,4 @@
-package com.gandiva.glance.media.widget
+package com.gandiva.glance.media.widget.ui
 
 import android.content.Context
 import android.content.Intent
@@ -32,10 +32,8 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.gandiva.glance.MainActivity
 import com.gandiva.glance.R
-import com.gandiva.glance.media.widget.MediaActionHandler.Companion.sendMediaAction
+import com.gandiva.glance.media.widget.ui.MediaActionHandler.Companion.sendMediaAction
 import com.gandiva.glance.media.widget.manager.MediaWidgetManagerImpl
-import com.gandiva.glance.media.widget.ui.MediaWidgetTheme
-import com.gandiva.glance.media.widget.ui.WidgetTheme
 import java.io.Serializable
 
 
@@ -174,7 +172,7 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                             width = LocalSize.current.width - MediaWidgetTheme.dimens.contentPadding.times(2),
                             height = 8.dp,
                             widgetData.progress,
-                            trackColor = MediaWidgetTheme.colors.secondary,
+                            trackColor = MediaWidgetTheme.colors.onPrimary,
                             progressColor = MediaWidgetTheme.colors.primary
                         )
                     }
@@ -218,7 +216,7 @@ class MediaActionHandler : ActionCallback {
         private val KEY_MEDIA_COMMAND = ActionParameters.Key<Command>("media_command")
 
         fun sendMediaAction(command: Command) = actionRunCallback<MediaActionHandler>(
-            actionParametersOf(MediaActionHandler.KEY_MEDIA_COMMAND to command)
+            actionParametersOf(KEY_MEDIA_COMMAND to command)
         )
     }
 
@@ -265,13 +263,13 @@ fun MediaButton(size: Dp, @DrawableRes iconResId: Int, contentDescription: Strin
             .width(size)
             .height(size)
             .padding(size / 6)
-            .background(Color.Yellow)
+            .background(MediaWidgetTheme.colors.secondary)
             .clickable(action)
     ) {
         Image(
             provider = IconImageProvider(
                 IconCompat.createWithResource(LocalContext.current, iconResId)
-                    .setTint(Color.Red.toArgb())
+                    .setTint(MediaWidgetTheme.colors.onSecondary.toArgb())
                     .toIcon(LocalContext.current)
             ),
             contentDescription = contentDescription,
@@ -288,7 +286,7 @@ fun ThemeToggleButton(isDarkTheme: Boolean) {
                 LocalContext.current,
                 if (isDarkTheme) R.drawable.ic_sun else R.drawable.ic_moon
             )
-                .setTint(Color.Red.toArgb())
+                .setTint(MediaWidgetTheme.colors.onSecondary.toArgb())
                 .toIcon(LocalContext.current)
         ),
         contentDescription = "toggle",
