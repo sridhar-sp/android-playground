@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.IconCompat
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -161,8 +162,13 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                             }
                         }
                     }
-
-
+                    Spacer(modifier = GlanceModifier.size(8.dp))
+                    Text(
+                        text = widgetData.title,
+                        modifier = GlanceModifier.wrapContentSize()
+                            .padding(horizontal = MediaWidgetTheme.dimens.contentPadding),
+                        style = TextStyle(color = ColorProvider(MediaWidgetTheme.colors.onBackground), fontSize = 18.sp)
+                    )
                     Spacer(modifier = GlanceModifier.size(MediaWidgetTheme.dimens.contentPadding))
                     Box(
                         modifier = GlanceModifier.fillMaxWidth()
@@ -319,6 +325,7 @@ class LaunchAppActionCallback : ActionCallback {
 }
 
 data class WidgetData(
+    val title:String,
     val totalTime: String,
     val currentTime: String,
     val progress: Float,

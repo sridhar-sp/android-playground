@@ -34,6 +34,7 @@ class MediaWidgetManager(private val appContext: Context) {
         private fun formatTime(timeInMillis: Long) = timeFormat.format(Date(timeInMillis))
 
         fun defaultWidgetData() = WidgetData(
+            "",
             formatTime(0L),
             formatTime(0L),
             0f,
@@ -43,6 +44,7 @@ class MediaWidgetManager(private val appContext: Context) {
 
         fun mediaMetaDataToWidgetData(mediaMetaData: MediaPlayerService.MediaMetaData): WidgetData {
             return WidgetData(
+                mediaMetaData.title,
                 formatTime(mediaMetaData.totalTimeInMillis),
                 formatTime(mediaMetaData.currentTimeMillis),
                 mediaMetaData.progress,
@@ -98,6 +100,7 @@ class MediaWidgetManager(private val appContext: Context) {
             getOrInitMediaPlayerService().getMediaMetaDataFlow().onEach { mediaMetaData ->
                 MediaWidget(
                     WidgetData(
+                        mediaMetaData.title,
                         formatTime(mediaMetaData.totalTimeInMillis),
                         formatTime(mediaMetaData.currentTimeMillis),
                         mediaMetaData.progress,

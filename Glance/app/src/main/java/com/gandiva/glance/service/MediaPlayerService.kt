@@ -30,6 +30,7 @@ class MediaPlayerService : Service(), IMediaPlayerService {
 
     data class MediaMetaData(
         val id: String,
+        val title: String,
         val totalTimeInMillis: Long,
         var currentTimeMillis: Long,
         var progress: Float,
@@ -189,6 +190,7 @@ private class MediaSource {
         val mediaData = arrayListOf(
             MediaPlayerService.MediaMetaData(
                 "1",
+                "Song 1",
                 minutesToMilliseconds(5),
                 0,
                 0f,
@@ -197,6 +199,7 @@ private class MediaSource {
             ),
             MediaPlayerService.MediaMetaData(
                 "2",
+                "Song 2",
                 minutesToMilliseconds(4),
                 0,
                 0f,
@@ -204,7 +207,8 @@ private class MediaSource {
                 false
             ),
             MediaPlayerService.MediaMetaData(
-                "4",
+                "3",
+                "Song 3",
                 minutesToMilliseconds(3),
                 0,
                 0f,
@@ -213,13 +217,21 @@ private class MediaSource {
             ),
             MediaPlayerService.MediaMetaData(
                 "4",
+                "Song 4",
                 minutesToMilliseconds(1),
                 0,
                 0f,
                 R.drawable.sample_4_album_art,
                 false
             ),
-            MediaPlayerService.MediaMetaData("5", minutesToMilliseconds(6), 0, 0f, R.drawable.sample_5_album_art, false)
+            MediaPlayerService.MediaMetaData(
+                "5", "Song 5",
+                minutesToMilliseconds(6),
+                0,
+                0f,
+                R.drawable.sample_5_album_art,
+                false
+            )
         )
     }
 
