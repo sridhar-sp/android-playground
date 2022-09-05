@@ -30,6 +30,42 @@
                 android:resource="@xml/media_widget_info" />
         </receiver>
 
+        <receiver
+            android:name=".size.widget.ExactSizeGlanceAppWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/exact_size_glance_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".size.widget.SingleSizeGlanceAppWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/single_size_glance_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".size.widget.ResponsiveSizeGlanceAppWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/responsive_size_glance_widget_info" />
+        </receiver>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
