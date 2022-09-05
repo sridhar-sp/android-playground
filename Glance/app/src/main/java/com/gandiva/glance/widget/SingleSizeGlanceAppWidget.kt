@@ -1,4 +1,4 @@
-package com.gandiva.glance.size.widget
+package com.gandiva.glance.widget
 
 import androidx.compose.runtime.Composable
 import androidx.glance.appwidget.GlanceAppWidget

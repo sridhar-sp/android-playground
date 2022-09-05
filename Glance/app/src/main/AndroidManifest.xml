@@ -31,7 +31,7 @@
         </receiver>
 
         <receiver
-            android:name=".size.widget.ExactSizeGlanceAppWidgetReceiver"
+            android:name="com.gandiva.glance.widget.ExactSizeGlanceAppWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -43,7 +43,7 @@
         </receiver>
 
         <receiver
-            android:name=".size.widget.SingleSizeGlanceAppWidgetReceiver"
+            android:name="com.gandiva.glance.widget.SingleSizeGlanceAppWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -55,7 +55,7 @@
         </receiver>
 
         <receiver
-            android:name=".size.widget.ResponsiveSizeGlanceAppWidgetReceiver"
+            android:name="com.gandiva.glance.widget.ResponsiveSizeGlanceAppWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
