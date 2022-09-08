@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.IconCompat
@@ -33,8 +32,8 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.gandiva.glance.MainActivity
 import com.gandiva.glance.R
-import com.gandiva.glance.media.widget.ui.MediaActionHandler.Companion.sendMediaAction
 import com.gandiva.glance.media.widget.manager.MediaWidgetManagerImpl
+import com.gandiva.glance.media.widget.ui.MediaActionHandler.Companion.sendMediaAction
 import java.io.Serializable
 
 
@@ -48,17 +47,6 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
     }
 
     companion object {
-        private val SMALL_BOX = DpSize(90.dp, 90.dp)
-        private val BIG_BOX = DpSize(180.dp, 180.dp)
-        private val VERY_BIG_BOX = DpSize(300.dp, 210.dp)
-        private val ROW = DpSize(180.dp, 48.dp)
-        private val LARGE_ROW = DpSize(300.dp, 48.dp)
-        private val COLUMN = DpSize(48.dp, 180.dp)
-        private val LARGE_COLUMN = DpSize(48.dp, 300.dp)
-        private val SMALL = DpSize(90.dp, 90.dp)
-        private val MEDIUM = DpSize(180.dp, 180.dp)
-        private val BIG = DpSize(250.dp, 250.dp)
-
         val PREF_IS_DARK_THEME_KEY = booleanPreferencesKey("isDarkTheme")
     }
 
@@ -325,7 +313,7 @@ class LaunchAppActionCallback : ActionCallback {
 }
 
 data class WidgetData(
-    val title:String,
+    val title: String,
     val totalTime: String,
     val currentTime: String,
     val progress: Float,

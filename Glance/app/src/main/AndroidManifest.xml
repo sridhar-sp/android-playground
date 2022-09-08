@@ -66,6 +66,19 @@
                 android:resource="@xml/responsive_size_glance_widget_info" />
         </receiver>
 
+        <receiver
+            android:name="com.gandiva.glance.widget.state.StatefulGlanceAppWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/stateful_glance_widget_info" />
+        </receiver>
+
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

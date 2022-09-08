@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:description="@string/app_widget_description"
+    android:description="@string/responsive_app_widget_description"
     android:initialLayout="@layout/responsive_size_widget_preview"
     android:previewLayout="@layout/responsive_size_widget_preview"
     android:minWidth="70dp"
@@ -11,5 +11,4 @@
     android:maxResizeWidth="1050dp"
     android:maxResizeHeight="787dp"
     android:targetCellWidth="5"
-    android:targetCellHeight="3"
-    />
+    android:targetCellHeight="3" />

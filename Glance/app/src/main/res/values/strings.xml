@@ -2,7 +2,7 @@
     <string name="app_name">Glance</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
-    <string name="app_widget_description">This is an app widget description</string>
+
     <string name="media_notification_title">@string/app_name</string>
     <string name="media_notification_desc">Use widget to control the media playback</string>
     <string name="widget_loading">Please wait, widget is loading…</string>
@@ -12,4 +12,12 @@
     <string name="single_size_glance_widget_title">Single size glance widget</string>
     <string name="exact_size_glance_widget_title">Exact size glance widget</string>
     <string name="responsive_size_glance_widget_title">Responsive size glance widget</string>
+    <string name="stateful_glance_widget_title">Stateful glance widget</string>
+
+    <string name="stateful_app_widget_description">This is stateful app widget description</string>
+    <string name="exact_size_app_widget_description">This is an exact size app widget description</string>
+    <string name="single_size_app_widget_description">This is a single size app widget description</string>
+    <string name="responsive_app_widget_description">This is a responsive app widget description</string>
+    <string name="media_app_widget_description">This is a media app widget description</string>
+
 </resources>

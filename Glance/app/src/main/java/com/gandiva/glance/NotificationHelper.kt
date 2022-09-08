@@ -28,7 +28,10 @@ class NotificationHelper {
         }
 
         private fun getDefaultNotificationChannel(): NotificationChannelCompat {
-            return NotificationChannelCompat.Builder(Channel.DEFAULT_CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_DEFAULT)
+            return NotificationChannelCompat.Builder(
+                Channel.DEFAULT_CHANNEL_ID,
+                NotificationManagerCompat.IMPORTANCE_DEFAULT
+            )
                 .setName(DEFAULT_CHANNEL_NAME)
                 .setDescription(DEFAULT_CHANNEL_DESC)
                 .build()
