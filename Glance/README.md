@@ -1,5 +1,8 @@
 ## Glance
 
+### Medium post
+https://medium.com/@sridhar-sp/android-app-widgets-with-glance-9e881f40c636
+
 ### Media widget
 <details><summary>See demo</summary>
 <img src="docs/demo.gif"</img>
