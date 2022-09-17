@@ -3,6 +3,8 @@
 ### Medium post
 https://medium.com/@sridhar-sp/android-app-widgets-with-glance-9e881f40c636
 
+### Featured on [Google dev library](https://devlibrary.withgoogle.com/authors/sridhar-sp)
+ 
 ### Media widget
 <details><summary>See demo</summary>
 <img src="docs/demo.gif"</img>
