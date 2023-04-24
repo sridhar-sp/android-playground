@@ -12,6 +12,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Server"
         tools:targetApi="31">
+
+        <service
+            android:name=".SensorDataLoggerService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="SensorDataLoggerService" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -14,3 +14,4 @@ pluginManagement {
 //}
 rootProject.name = "AIDL-Server"
 include ':app'
+include ':remoteServices'
