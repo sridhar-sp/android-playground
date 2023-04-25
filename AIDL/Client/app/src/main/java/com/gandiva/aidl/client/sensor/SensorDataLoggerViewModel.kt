@@ -12,7 +12,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import com.gandiva.aidl.remoteservices.SensorDataCallback
 import com.gandiva.aidl.remoteservices.SensorDataLoggerAIDL
+import com.gandiva.aidl.remoteservices.model.SensorData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import timber.log.Timber
@@ -101,5 +103,17 @@ class SensorDataLoggerViewModel @Inject constructor(
 
     fun showRpm() {
         Toast.makeText(appContext, "RPM ${sensorDataLoggerService?.speedInKm}", Toast.LENGTH_SHORT).show()
+    }
+
+    fun listenForChanges() {
+        sensorDataLoggerService?.startLogging(object : SensorDataCallback.Stub() {
+            override fun onEvent(sensorData: SensorData?) {
+                Timber.d("Sensor data $sensorData")
+            }
+        })
+    }
+
+    fun removeChangeListener() {
+        sensorDataLoggerService?.stopLogging()
     }
 }

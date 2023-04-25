@@ -7,14 +7,12 @@ import android.util.Log
 
 class SensorDataLoggerService : Service() {
 
-    private val sensorDataLoggerService = SensorDataLoggerServiceAidl(SensorDataProviderImpl())
-
     override fun onCreate() {
         super.onCreate()
-        Log.d("SensorDataLoggerService","**** SensorDataLoggerService onCreate")
     }
 
     override fun onBind(intent: Intent): IBinder {
-        return sensorDataLoggerService.asBinder()
+        //Each client will have individual binder
+        return SensorDataLoggerServiceAidl(SensorDataProviderImpl()).asBinder()
     }
 }

@@ -5,4 +5,6 @@
     <string name="available_apis">Available API\'s</string>
     <string name="show_speed">Show speed</string>
     <string name="show_rpm">Show RPM</string>
+    <string name="attach_listener">Attach listener</string>
+    <string name="remove_listener">Remove listener</string>
 </resources>

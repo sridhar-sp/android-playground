@@ -36,6 +36,8 @@ fun SensorDataLoggerScreen(viewModel: SensorDataLoggerViewModel = hiltViewModel(
             )
             DefaultButton(text = stringResource(id = R.string.show_speed), onClick = viewModel::showSpeed)
             DefaultButton(text = stringResource(id = R.string.show_rpm), onClick = viewModel::showRpm)
+            DefaultButton(text = stringResource(id = R.string.attach_listener), onClick = viewModel::listenForChanges)
+            DefaultButton(text = stringResource(id = R.string.remove_listener), onClick = viewModel::removeChangeListener)
         }
 
 
