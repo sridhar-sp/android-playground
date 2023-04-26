@@ -9,7 +9,7 @@ interface SensorDataLoggerAIDL {
 
     int getRPM();
 
-    void startLogging(in SensorDataCallback callback);
+    void startLogging(long intervalInMillis, in SensorDataCallback callback);
 
     void stopLogging();
 

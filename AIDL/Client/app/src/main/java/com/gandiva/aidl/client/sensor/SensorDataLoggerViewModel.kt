@@ -40,7 +40,10 @@ class SensorDataLoggerViewModel @Inject constructor(
     var isServiceConnected by mutableStateOf(false)
         private set
 
-    val tabs: List<Tabs> = listOf(Tabs.SensorScreenTab, Tabs.MessageScreenTab)
+    var isLoggerCallbackAttached by mutableStateOf(false)
+        private set
+
+    var sensorLogs by mutableStateOf("")
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -75,25 +78,20 @@ class SensorDataLoggerViewModel @Inject constructor(
             component = ComponentName("com.gandiva.aidl.server", "com.gandiva.aidl.server.SensorDataLoggerService")
             action = "SensorDataLoggerService"
         }
-        Timber.d("**** connectToService")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val bindService =
-                appContext.bindService(
-                    sensorServiceIntent,
-                    Context.BIND_AUTO_CREATE,
-                    appContext.mainExecutor,
-                    serviceConnection
-                )
-            Timber.d("**** new bindServiceResult $bindService")
+            appContext.bindService(
+                sensorServiceIntent,
+                Context.BIND_AUTO_CREATE,
+                appContext.mainExecutor,
+                serviceConnection
+            )
         } else {
-            val bindService =
-                appContext.applicationContext.bindService(
-                    sensorServiceIntent,
-                    serviceConnection,
-                    Context.BIND_NOT_FOREGROUND
-                )
-            Timber.d("**** old bindServiceResult $bindService")
+            appContext.applicationContext.bindService(
+                sensorServiceIntent,
+                serviceConnection,
+                Context.BIND_NOT_FOREGROUND
+            )
         }
     }
 
@@ -106,14 +104,19 @@ class SensorDataLoggerViewModel @Inject constructor(
     }
 
     fun listenForChanges() {
-        sensorDataLoggerService?.startLogging(object : SensorDataCallback.Stub() {
-            override fun onEvent(sensorData: SensorData?) {
-                Timber.d("Sensor data $sensorData")
-            }
-        })
+        sensorDataLoggerService?.run {
+            startLogging(1500, object : SensorDataCallback.Stub() {
+                override fun onEvent(sensorData: SensorData?) {
+                    sensorLogs = sensorData.toString()
+                    Timber.d("*** $sensorData")
+                }
+            })
+            isLoggerCallbackAttached = true
+        }
     }
 
     fun removeChangeListener() {
         sensorDataLoggerService?.stopLogging()
+        isLoggerCallbackAttached = false
     }
 }

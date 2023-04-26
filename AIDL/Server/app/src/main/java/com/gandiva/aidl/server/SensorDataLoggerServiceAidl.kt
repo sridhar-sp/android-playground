@@ -1,6 +1,5 @@
 package com.gandiva.aidl.server
 
-import android.os.RemoteCallbackList
 import android.util.Log
 import com.gandiva.aidl.remoteservices.SensorDataCallback
 import com.gandiva.aidl.remoteservices.SensorDataLoggerAIDL
@@ -20,14 +19,7 @@ class SensorDataLoggerServiceAidl(private val sensorDataProvider: SensorDataProv
 
     private val random = Random()
 
-    private val sensorCallbackTimerTask = object : TimerTask() {
-        override fun run() {
-            Log.d("sensorCallbackTimerTask", "Sending event $sensorDataCallback")
-            sensorDataCallback?.onEvent(SensorData(SPEED_SENSOR_ID, random.nextInt(1500)))
-            sensorDataCallback?.onEvent(SensorData(RPM_SENSOR_ID, random.nextInt(1500)))
-        }
-
-    }
+    private var timer = Timer()
 
     override fun getSpeedInKm(): String {
         return sensorDataProvider.getSensorData(SPEED_SENSOR_ID)[0].toString()
@@ -37,26 +29,25 @@ class SensorDataLoggerServiceAidl(private val sensorDataProvider: SensorDataProv
         return sensorDataProvider.getSensorData(RPM_SENSOR_ID)[0]
     }
 
-    override fun startLogging(callback: SensorDataCallback?) {
-        Log.d("startLogging", "callback $callback")
+    override fun startLogging(intervalInMillis: Long, callback: SensorDataCallback?) {
         sensorDataCallback = callback
-        simulateLogging()
-
-//        val a = RemoteCallbackList<SensorDataCallback>()
-//        a.register(callback)
-//
-//        a.beginBroadcast()
-//        a.getBroadcastItem(0).onEvent(SensorData(1, 1))
+        simulateLogging(intervalInMillis)
     }
 
     override fun stopLogging() {
         sensorDataCallback = null
-        sensorCallbackTimerTask.cancel()
+        timer.cancel()
     }
 
-
-    private fun simulateLogging() {
-        Timer().scheduleAtFixedRate(sensorCallbackTimerTask, 0L, 1500L)
+    private fun simulateLogging(intervalInMillis: Long) {
+        timer = Timer()
+        timer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                Log.d("sensorCallbackTimerTask", "Sending event $sensorDataCallback")
+                sensorDataCallback?.onEvent(SensorData(SPEED_SENSOR_ID, random.nextInt(1500)))
+                sensorDataCallback?.onEvent(SensorData(RPM_SENSOR_ID, random.nextInt(1500)))
+            }
+        }, 0L, intervalInMillis)
     }
 
     private fun log(log: String) {
