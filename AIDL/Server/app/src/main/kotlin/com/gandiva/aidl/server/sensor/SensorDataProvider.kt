@@ -1,4 +1,4 @@
-package com.gandiva.aidl.server
+package com.gandiva.aidl.server.sensor
 
 import kotlin.random.Random
 

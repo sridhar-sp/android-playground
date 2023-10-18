@@ -1,4 +1,4 @@
-package com.gandiva.aidl.server
+package com.gandiva.aidl.server.sensor
 
 import android.util.Log
 import com.gandiva.aidl.remoteservices.SensorDataCallback
