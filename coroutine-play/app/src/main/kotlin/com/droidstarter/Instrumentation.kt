@@ -117,7 +117,7 @@ class InstrumentationImpl : Instrumentation {
     }
 
     override fun log(sessionKey: String, log: String) {
-        log("$sessionKey :: $log at duration ${getElapsedTimeFromStart(sessionKey)}")
+        log("$sessionKey :: $log at duration ${constructDuration(getElapsedTimeFromStart(sessionKey))}")
     }
 
     override fun clear() {

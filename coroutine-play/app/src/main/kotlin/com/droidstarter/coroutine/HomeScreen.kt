@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +38,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
@@ -95,7 +98,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                 }
             }
 
-            DefaultText(text = viewModel.taskStatus)
+            LogText(text = viewModel.taskStatus)
 
             if (viewModel.exeuctedTaskCountStatus > 0) {
                 DefaultText(text = "Ran ${viewModel.exeuctedTaskCountStatus} tasks")
@@ -188,7 +191,7 @@ private fun DefaultText(text: String) {
 
 @Composable
 private fun LogText(text: String) {
-    Text(text = text, style = MaterialTheme.typography.labelSmall, fontSize = 14.sp, lineHeight = 18.sp)
+    Text(text = text, style = MaterialTheme.typography.labelSmall, fontSize = 12.sp, lineHeight = 16.sp)
 }
 
 @Composable

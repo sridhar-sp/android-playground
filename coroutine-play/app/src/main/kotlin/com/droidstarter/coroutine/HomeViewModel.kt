@@ -193,11 +193,13 @@ class HomeViewModel : ViewModel() {
     }
 
     fun downloadImage() {
+        downloadImageLogs = ""
+        downloadedImage = null
         if (useCoroutine) {
-            downloadedImage = null
-            downloadedImage = downloadImageUsingCoroutine()
+            viewModelScope.launch {
+                downloadedImage = downloadImageUsingCoroutine(IMG_URL)
+            }
         } else {
-            downloadedImage = null
             executors.submit {
                 downloadedImage = downloadImageUsingThread(IMG_URL)
             }
@@ -219,7 +221,7 @@ class HomeViewModel : ViewModel() {
                 appendDownloadImageLogs(content)
             }
         })
-        val sessionKey = "Net:Call:Thread"
+        val sessionKey = "NetworkCall"
         downloadInstrumentation.start(sessionKey)
         try {
             downloadInstrumentation.log(sessionKey, "Executing download task using thread ${Thread.currentThread()}")
@@ -228,23 +230,24 @@ class HomeViewModel : ViewModel() {
             connection.doInput = true
             downloadInstrumentation.log(sessionKey, "Calling connect")
             connection.connect() // Connect to the server
-            downloadInstrumentation.log(sessionKey, "Calling connected")
+            downloadInstrumentation.log(sessionKey, "Connection established")
 
-            downloadInstrumentation.log(sessionKey, "Calling input stream")
+            downloadInstrumentation.log(sessionKey, "Obtaining input stream")
             inputStream = connection.inputStream
-            downloadInstrumentation.log(sessionKey, "Got input stream")
+            downloadInstrumentation.log(sessionKey, "Input stream obtained")
 
-            downloadInstrumentation.log(sessionKey, "Consuming input stream")
+            downloadInstrumentation.log(sessionKey, "Decoding input stream to bitmap")
             bitmap = BitmapFactory.decodeStream(inputStream) // Decode the InputStream into a Bitmap
-            downloadInstrumentation.log(sessionKey, "Consumed input stream")
+            downloadInstrumentation.log(sessionKey, "Bitmap decoding complete")
         } catch (e: Exception) {
-            e.printStackTrace() // Handle exceptions
+            e.printStackTrace()
+            downloadInstrumentation.log(sessionKey, "Exception occurred: ${e.message}")
         } finally {
-            downloadInstrumentation.log(sessionKey, "Closing connection")
+            downloadInstrumentation.log(sessionKey, "Closing input stream")
             inputStream?.close()
-            downloadInstrumentation.log(sessionKey, "Closed connection")
+            downloadInstrumentation.log(sessionKey, "Input stream closed")
 
-            downloadInstrumentation.log(sessionKey, "Disconnecting")
+            downloadInstrumentation.log(sessionKey, "Disconnecting the connection")
             connection?.disconnect()
             downloadInstrumentation.log(sessionKey, "Disconnected")
 
@@ -255,8 +258,123 @@ class HomeViewModel : ViewModel() {
         return bitmap
     }
 
-    fun downloadImageUsingCoroutine(): Bitmap? {
-        return null
+    suspend fun downloadImageUsingCoroutine(urlString: String): Bitmap? {
+        isDownloadInProgress = true
+        var bitmap: Bitmap? = null
+        var inputStream: InputStream? = null
+        var connection: HttpURLConnection? = null
+
+        val downloadInstrumentation = InstrumentationImpl.newInstance(logger = object : Instrumentation.Logger {
+            override fun log(content: String) {
+                appendDownloadImageLogs(content)
+            }
+        })
+        val sessionKey = "NetworkCall"
+        downloadInstrumentation.start(sessionKey)
+
+        try {
+            downloadInstrumentation.log(
+                sessionKey,
+                "Executing download task using coroutine ${Thread.currentThread()}"
+            )
+            val url = URL(urlString)
+            connection = withContext(Dispatchers.IO) {
+                url.openConnection()
+            } as HttpURLConnection
+            connection.doInput = true
+
+            downloadInstrumentation.log(sessionKey, "Calling connect")
+            withContext(Dispatchers.IO) {
+                connection.connect()
+            } // Connect to the server
+            downloadInstrumentation.log(sessionKey, "Connection established")
+
+            downloadInstrumentation.log(sessionKey, "Obtaining input stream")
+            inputStream = withContext(Dispatchers.IO) {
+                connection.inputStream
+            }
+            downloadInstrumentation.log(sessionKey, "Input stream obtained")
+
+            downloadInstrumentation.log(sessionKey, "Decoding input stream to bitmap")
+            bitmap = withContext(Dispatchers.IO) {
+                BitmapFactory.decodeStream(inputStream)
+            }
+            downloadInstrumentation.log(sessionKey, "Bitmap decoding complete")
+
+        } catch (e: Exception) {
+            e.printStackTrace() // Log the exception
+            downloadInstrumentation.log(sessionKey, "Exception occurred: ${e.message}")
+        } finally {
+            downloadInstrumentation.log(sessionKey, "Closing input stream")
+            inputStream?.close()
+            downloadInstrumentation.log(sessionKey, "Input stream closed")
+
+            downloadInstrumentation.log(sessionKey, "Disconnecting the connection")
+            connection?.disconnect()
+            downloadInstrumentation.log(sessionKey, "Disconnected")
+
+            isDownloadInProgress = false
+            downloadInstrumentation.stop(sessionKey)
+        }
+
+        return bitmap // Return the bitmap (null if failed)
+    }
+
+
+    suspend fun downloadImageSuspend(urlString: String): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            isDownloadInProgress = true
+            var bitmap: Bitmap? = null
+            var inputStream: InputStream? = null
+            var connection: HttpURLConnection? = null
+
+            val downloadInstrumentation = InstrumentationImpl.newInstance(logger = object : Instrumentation.Logger {
+                override fun log(content: String) {
+                    appendDownloadImageLogs(content)
+                }
+            })
+            val sessionKey = "NetworkCall"
+            downloadInstrumentation.start(sessionKey)
+
+            try {
+                downloadInstrumentation.log(
+                    sessionKey,
+                    "Executing download task using coroutine ${Thread.currentThread()}"
+                )
+                val url = URL(urlString)
+                connection = url.openConnection() as HttpURLConnection
+                connection.doInput = true
+
+                downloadInstrumentation.log(sessionKey, "Calling connect")
+                connection.connect() // Connect to the server
+                downloadInstrumentation.log(sessionKey, "Connection established")
+
+                downloadInstrumentation.log(sessionKey, "Obtaining input stream")
+                inputStream = connection.inputStream
+                downloadInstrumentation.log(sessionKey, "Input stream obtained")
+
+                downloadInstrumentation.log(sessionKey, "Decoding input stream to bitmap")
+                bitmap = BitmapFactory.decodeStream(inputStream)
+                downloadInstrumentation.log(sessionKey, "Bitmap decoding complete")
+
+            } catch (e: Exception) {
+                e.printStackTrace() // Log the exception
+                downloadInstrumentation.log(sessionKey, "Exception occurred: ${e.message}")
+            } finally {
+                downloadInstrumentation.log(sessionKey, "Closing input stream")
+                inputStream?.close()
+                downloadInstrumentation.log(sessionKey, "Input stream closed")
+
+                downloadInstrumentation.log(sessionKey, "Disconnecting the connection")
+                connection?.disconnect()
+                downloadInstrumentation.log(sessionKey, "Disconnected")
+
+                isDownloadInProgress = false
+                downloadInstrumentation.stop(sessionKey)
+            }
+
+            bitmap // Return the bitmap (null if failed)
+        }
     }
 
 }
