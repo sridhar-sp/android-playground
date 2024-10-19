@@ -1,6 +1,7 @@
 package com.droidstarter.coroutine
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
@@ -20,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
@@ -106,6 +110,30 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             }
         }
 
+        ColumnWithBorder {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                DefaultButton(text = "Download Image", onClick = viewModel::downloadImage)
+                if (viewModel.isDownloadInProgress) CircularProgressIndicator()
+            }
+
+            LogText(text = viewModel.downloadImageLogs)
+
+            viewModel.downloadedImage?.let { image ->
+                Image(
+                    bitmap = image.asImageBitmap(),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(vertical = 8.dp)
+                )
+            }
+        }
+
     }
 }
 
@@ -156,6 +184,11 @@ private fun DefaultButton(
 @Composable
 private fun DefaultText(text: String) {
     Text(text = text)
+}
+
+@Composable
+private fun LogText(text: String) {
+    Text(text = text, style = MaterialTheme.typography.labelSmall, fontSize = 14.sp, lineHeight = 18.sp)
 }
 
 @Composable
