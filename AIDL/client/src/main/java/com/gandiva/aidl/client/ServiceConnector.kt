@@ -9,10 +9,21 @@ import android.util.Log
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
 
 interface IServiceConnector<T> {
-    suspend fun getService(): T?
+
+    /**
+     *
+     * Connect to the service and return the service binder instance or null.
+     *
+     * @param timeOutInMillis Maximum time to wait for the service to get connected,
+     * returns null if service is not connected within the time.
+     *
+     * If the [timeOutInMillis] is negative then [getService] will suspend until the service gets connected.
+     */
+    suspend fun getService(timeOutInMillis: Long = -1): T?
 
     suspend fun unbindService()
 
@@ -36,16 +47,18 @@ open class ServiceConnector<T>(
 
     private val logTag = "Service :: ${this.javaClass}"
 
-    override suspend fun getService(): T? {
+    override suspend fun getService(timeOutInMillis: Long): T? {
         // If allowNullBinding is true don't care what service object is
         if (serviceConnected && (allowNullBinding || service != null)) {
             return service
         }
-        return mutex.withLock { bindAndGetService() }
+
+        if (timeOutInMillis < 0)
+            return mutex.withLock { bindAndGetService() }
+        return mutex.withLock { withTimeoutOrNull(timeOutInMillis) { bindAndGetService() } }
     }
 
     private suspend fun bindAndGetService() = suspendCancellableCoroutine { continuation ->
-
         val serviceConnection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
                 resumeWithServiceInstance(binder)
@@ -86,7 +99,7 @@ open class ServiceConnector<T>(
 
         }
 
-        logV("Initiating bind service connection")
+        logD("Initiating bind service connection")
         context.bindService(
             intent, serviceConnection, Context.BIND_AUTO_CREATE
         )
@@ -104,9 +117,5 @@ open class ServiceConnector<T>(
 
     private fun logD(log: String) {
         Log.d(logTag, log)
-    }
-
-    private fun logV(log: String) {
-        Log.v(logTag, log)
     }
 }

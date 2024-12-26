@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.gandiva.aidl.client.sensor.SensorDataLoggerViewModel.Companion
 import com.gandiva.aidl.remoteservices.SensorDataCallback
 import com.gandiva.aidl.remoteservices.model.SensorData
 import dagger.hilt.android.lifecycle.HiltViewModel
