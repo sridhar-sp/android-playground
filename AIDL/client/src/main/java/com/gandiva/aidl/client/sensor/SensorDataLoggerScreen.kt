@@ -20,15 +20,18 @@ import com.gandiva.aidl.client.ui.theme.appDimens
 
 @Composable
 fun SensorDataLoggerScreen(viewModel: SensorDataLoggerViewModel = hiltViewModel()) {
-    Column(Modifier.fillMaxSize()) {
-        Text(text = "SensorDataLoggerScreen", style = MaterialTheme.typography.titleMedium)
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(MaterialTheme.appDimens.mediumContentPadding)) {
+        Text(text = "SensorDataLoggerScreen Using Traditional Approach", style = MaterialTheme.typography.titleMedium)
 
         DefaultButton(
             text = if (viewModel.isServiceConnected) stringResource(id = R.string.disconnect) else stringResource(
                 id = R.string.connect_to_sensor_service
             ), onClick = {
-//                if (viewModel.isServiceConnected) viewModel.disconnectService()
-//                else
+                if (viewModel.isServiceConnected) viewModel.disconnectService()
+                else
                     viewModel.connectToService()
             }
         )

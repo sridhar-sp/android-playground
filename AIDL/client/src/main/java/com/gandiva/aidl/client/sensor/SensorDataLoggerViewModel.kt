@@ -7,16 +7,16 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import com.gandiva.aidl.remoteservices.SensorDataCallback
-import com.gandiva.aidl.remoteservices.SensorDataLoggerAIDL
+import com.gandiva.aidl.remoteservices.SensorDataLoggerService
 import com.gandiva.aidl.remoteservices.model.SensorData
 import dagger.hilt.android.lifecycle.HiltViewModel
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,12 +25,14 @@ class SensorDataLoggerViewModel @Inject constructor(
 ) : AndroidViewModel(appContext) {
 
     companion object {
+        private const val TAG = "SensorDataLoggerViewModel"
+
         const val SENSOR_DATA_LOGGER_PKG_NAME = "com.gandiva.aidl.server"
-        const val SENSOR_DATA_LOGGER_SERVICE_NAME = "com.gandiva.aidl.server.sensor.SensorDataLoggerService"
-        const val SENSOR_DATA_LOGGER_BIND_ACTION = "SensorDataLoggerService"
+        const val SENSOR_DATA_LOGGER_SERVICE_NAME = "com.gandiva.aidl.server.sensor.SensorDataLoggerServiceImpl"
+        const val SENSOR_DATA_LOGGER_BIND_ACTION = "com.gandiva.aidl.server.action.BIND_SENSOR_DATA_LOGGER"
     }
 
-    private var sensorDataLoggerService: SensorDataLoggerAIDL? = null
+    private var sensorDataLoggerService: SensorDataLoggerService? = null
 
     var isServiceConnected by mutableStateOf(false)
         private set
@@ -43,23 +45,23 @@ class SensorDataLoggerViewModel @Inject constructor(
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             isServiceConnected = true
-            Timber.d("onServiceConnected")
-            sensorDataLoggerService = SensorDataLoggerAIDL.Stub.asInterface(service)
+            Log.d(TAG, "onServiceConnected")
+            sensorDataLoggerService = SensorDataLoggerService.Stub.asInterface(service)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             isServiceConnected = false
-            Timber.d("onServiceDisconnected")
+            Log.d(TAG, "onServiceDisconnected")
         }
 
         override fun onBindingDied(name: ComponentName?) {
             isServiceConnected = false
-            Timber.d("onBindingDied")
+            Log.d(TAG, "onBindingDied")
         }
 
         override fun onNullBinding(name: ComponentName?) {
             isServiceConnected = false
-            Timber.d("onNullBinding")
+            Log.d(TAG, "onNullBinding")
         }
     }
 
@@ -98,20 +100,22 @@ class SensorDataLoggerViewModel @Inject constructor(
         Toast.makeText(appContext, "RPM ${sensorDataLoggerService?.speedInKm}", Toast.LENGTH_SHORT).show()
     }
 
+    private val sensorCallback = object : SensorDataCallback.Stub() {
+        override fun onEvent(sensorData: SensorData?) {
+            sensorLogs = sensorData.toString()
+            Log.d(TAG, "*** $sensorData")
+        }
+    }
+
     fun listenForChanges() {
         sensorDataLoggerService?.run {
-            startLogging(1500, object : SensorDataCallback.Stub() {
-                override fun onEvent(sensorData: SensorData?) {
-                    sensorLogs = sensorData.toString()
-                    Timber.d("*** $sensorData")
-                }
-            })
+            startLogging(sensorCallback)
             isLoggerCallbackAttached = true
         }
     }
 
     fun removeChangeListener() {
-        sensorDataLoggerService?.stopLogging()
+        sensorDataLoggerService?.stopLogging(sensorCallback)
         isLoggerCallbackAttached = false
     }
 }
