@@ -24,14 +24,10 @@ class SensorDataLoggerViewModel @Inject constructor(
     val appContext: Application
 ) : AndroidViewModel(appContext) {
 
-
     companion object {
-//        const val SENSOR_SERVICE_P
-    }
-
-    sealed class Tabs(val position: Int) {
-        object SensorScreenTab : Tabs(0)
-        object MessageScreenTab : Tabs(1)
+        const val SENSOR_DATA_LOGGER_PKG_NAME = "com.gandiva.aidl.server"
+        const val SENSOR_DATA_LOGGER_SERVICE_NAME = "com.gandiva.aidl.server.sensor.SensorDataLoggerService"
+        const val SENSOR_DATA_LOGGER_BIND_ACTION = "SensorDataLoggerService"
     }
 
     private var sensorDataLoggerService: SensorDataLoggerAIDL? = null
@@ -74,9 +70,8 @@ class SensorDataLoggerViewModel @Inject constructor(
 
     fun connectToService(appContext: Context = this.getApplication()) {
         val sensorServiceIntent = Intent().apply {
-            component =
-                ComponentName("com.gandiva.aidl.server", "com.gandiva.aidl.server.sensor.SensorDataLoggerService")
-            action = "SensorDataLoggerService"
+            component = ComponentName(SENSOR_DATA_LOGGER_PKG_NAME, SENSOR_DATA_LOGGER_SERVICE_NAME)
+            action = SENSOR_DATA_LOGGER_BIND_ACTION
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
