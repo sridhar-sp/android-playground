@@ -1,4 +1,4 @@
-package com.gandiva.aidl.client
+package io.github.sridhar_sp.service_connector
 
 import android.content.ComponentName
 import android.content.Context

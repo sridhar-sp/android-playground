@@ -66,6 +66,7 @@ dependencies {
     kapt(libs.dagger.hilt.compiler)
 
     implementation(files("libs/remoteServices.aar"))
+    implementation(project(":service-connector"))
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit4)

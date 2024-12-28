@@ -4,8 +4,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import com.gandiva.aidl.client.ServiceConnector
 import com.gandiva.aidl.remoteservices.SensorDataLoggerService
+import io.github.sridhar_sp.service_connector.ServiceConnector
 
 class SensorDataLoggerServiceCoordinator(context: Context) : ServiceConnector<SensorDataLoggerService>(
     context = context,

@@ -23,3 +23,4 @@ rootProject.name = "AIDL"
 include(":client")
 include(":server")
 include(":remoteServices")
+include(":service-connector")
