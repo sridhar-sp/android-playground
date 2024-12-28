@@ -85,16 +85,14 @@ open class ServiceConnector<T>(
             private fun resumeWithServiceInstance(binder: IBinder?) {
                 service = transformBinderToService(binder)
                 serviceConnected = true
-                continuation.resume(service)
+                if (continuation.isActive) continuation.resume(service)
                 onServiceConnected()
             }
 
             private fun cleanUpAndResumeIfRequired() {
                 service = null
                 serviceConnected = false
-                if (continuation.isActive) {
-                    continuation.resume(null)
-                }
+                if (continuation.isActive) continuation.resume(null)
             }
 
         }
