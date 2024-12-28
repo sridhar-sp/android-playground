@@ -2,10 +2,10 @@
 
 ### What's AIDL
 
-Android Interface Definition Language (AIDL), using we can create common interface which both client and server agree
-upon in order to communicate with each other using IPC.
+Android Interface Definition Language (AIDL), using which we can create common interface which both client and server
+agree upon in order to communicate with each other using IPC.
 
-AIDL supports all java primitive and handful of wrapper data types, such as String, List, Map
+AIDL supports all java primitive data types and handful of wrapper data types, such as String, List, Map
 
 ## Android IPC
 
@@ -31,7 +31,7 @@ We are going to build two apps, one is a data provider or we can call it as serv
 
 * We will also discuss about a small utility class which I created to take care of the boiler plate code when binding
   with a service, also it exposes a getService method which returns a service object if service already binded otherwise
-  the method suspend until a service gets bind. or a timeout expires.
+  the method suspend until a service gets connected. or a timeout expires.
 * This will come in handy, when the server app crashed due do some reason, the next time we call the getService method,
   it takes care of binding with the service and returns the binder interface.
 
@@ -49,15 +49,27 @@ We are going to build two apps, one is a data provider or we can call it as serv
         int getRPM();
         void startLogging(in SensorDataCallback callback);
         void stopLogging(in SensorDataCallback callback);
-    }    
+    }
     ```
     ```aidl
     package com.gandiva.aidl.remoteservices;
     import com.gandiva.aidl.remoteservices.model.SensorData;
     
     interface SensorDataCallback {
+        // Create a SensorData class, which should implement android.os.Parcelable interface, and placed in java/kotlin package.
         void onEvent(in SensorData data);
     }
+    ```
+    * Create a SensorData class, which should implement android.os.Parcelable interface, and placed in java/kotlin
+      package.
+    ```kotlin
+    package com.gandiva.aidl.remoteservices.model
+    
+    import android.os.Parcelable
+    import kotlinx.parcelize.Parcelize
+    
+    @Parcelize
+    data class SensorData(val sensorID: Int, val value: Int) : Parcelable
     ```
   * We need to share this interface with both application, so it would be advisable to create a library module and
     share the interface with the two apps. (Note as general software practise we don't share interfaces which client app
@@ -81,7 +93,7 @@ We are going to build two apps, one is a data provider or we can call it as serv
 
 ### Step 2
 
-* Create a Android Service to expose the AIDL interface implementation from onBind method
+* Create a Android Service to expose the Binder interface implementation from onBind method
 
 ```kotlin
 class SensorDataLoggerServiceImpl : Service() {
@@ -117,7 +129,7 @@ class SensorDataLoggerServiceImpl : Service() {
 ```
 
 * For brevity, the methods just have TODO, actual implementation can be
-  found [SensorDataLoggerServiceAidl.kt](server%2Fsrc%2Fmain%2Fkotlin%2Fcom%2Fgandiva%2Faidl%2Fserver%2Fsensor%2FSensorDataLoggerServiceAidl.kt)]
+  found [SensorDataLoggerServiceAidl.kt](server%2Fsrc%2Fmain%2Fkotlin%2Fcom%2Fgandiva%2Faidl%2Fserver%2Fsensor%2FSensorDataLoggerServiceAidl.kt)
 
 ### Step 3
 
@@ -306,11 +318,11 @@ open class ServiceConnector<T>(
 
 * Extent the ServiceConnector and provide necessary information about the service which we want to connect and the Type
   of the binder interface.
-* @param context Context used to bind the service.
-* @param intent Explicit intent describing the service to connect.
-* @param transformBinderToService callback function called to transform the generic IBinder instance to the client
+* `@param context` Context used to bind the service.
+* `@param intent` Explicit intent describing the service to connect.
+* `@param transformBinderToService` callback function called to transform the generic IBinder instance to the client
   specific AIDL interface.
-* @param allowNullBinding Pass true to indicate to keep the server connected even if the server returns null IBinder
+* `@param allowNullBinding` Pass true to indicate to keep the server connected even if the server returns null IBinder
   instance from onBind method.
 
 ```kotlin

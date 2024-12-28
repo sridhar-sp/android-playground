@@ -21,6 +21,7 @@ interface SensorDataCallback {
      * This means that the value of the parameter is initially passed from the client to the server,
      * and the server may modify the value and pass it back to the client.
      *
+     * Create a SensorData class, which should implement android.os.Parcelable interface, and placed in java/kotlin package.
      */
     void onEvent(in SensorData data);
 }
