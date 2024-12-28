@@ -7,7 +7,7 @@ import android.os.IBinder
 import com.gandiva.aidl.client.ServiceConnector
 import com.gandiva.aidl.remoteservices.SensorDataLoggerService
 
-class SensorDataLoggerServiceCoordinator(val context: Context) : ServiceConnector<SensorDataLoggerService>(
+class SensorDataLoggerServiceCoordinator(context: Context) : ServiceConnector<SensorDataLoggerService>(
     context = context,
     intent = bindIntent(),
     transformBinderToService = { binder: IBinder? -> binder?.let { SensorDataLoggerService.Stub.asInterface(it) } },
