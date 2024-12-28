@@ -1,20 +1,19 @@
 # Android IPC (using AIDL)
 
-## Quick guide to AIDL.
+### Quick guide to AIDL.
 
-### What's AIDL
+## What's AIDL
 
-Android Interface Definition Language (AIDL), using which we can create common interface which both client and server
-agree upon in order to communicate with each other using IPC.
+AIDL (Android Interface Definition Language) is used to create a common interface for client-server communication in
+Android. Both client and server can agree on the common interface to communicate with each other using IPC.
 
 AIDL supports all java primitive data types and handful of wrapper data types, such as String, List, Map
 
 ## Android IPC
 
-* Note: Communication between two android apps can be achieved using multiple ways, in this blog we are going to discuss
-  about IPC using AIDL
+* Note: Android apps can communicate using several methods; this guide focuses on IPC via AIDL.
 
-### What we are going to build
+## What we are going to build
 
 To demonstrate AIDL in action, we'll build a practical example: a sensor data logging system consisting of two
 applications:
@@ -35,11 +34,13 @@ applications:
 ### Service Connector
 
 * We will also discuss about a small utility class which I created to take care of the boiler plate code when binding
-  with a service, also it exposes a getService method which returns a service object if service already binded otherwise
-  the method suspend until a service gets connected. or a timeout expires.
+  with a service.
+* ServiceConnector handles binding to services and manages retries when the server crashes or stops. It provides a
+  `getService` method that `suspends` until a connection is established or a timeout occurs.
 * This will come in handy, when the server app crashed due do some reason, the next time we call the getService method,
   it takes care of binding with the service and returns the binder interface.
 
+## Let's see some code
 ### Step 1
 
 * Create an AIDL interface
@@ -200,10 +201,10 @@ class SensorDataLoggerViewModel @Inject constructor(val appContext: Application)
 ```
 
 * In above code we have to explicitly call connectToService method to initialize the connection and post connection only
-  we should call any method from the (AIDL) binder instance, So our code works under the assumption that when showSpeed
-  method called it try to call the AIDL API irrespective of the connection. This works in best case scenario, but real
-  world will be far from best case scenario. The server app can crash or stopped post initial connection, leaving the
-  last obtained AIDL binder instance as obsolete.
+  we should call any method from the (AIDL) binder instance.
+* So our code works under the assumption that when showSpeed method called it try to call the AIDL API irrespective of
+  the connection. This works in best case scenario, but real world will be far from best case scenario. The server app
+  can crash or stopped post initial connection, leaving the last obtained AIDL binder instance as obsolete.
 * So, we should have a way to call the API only when the service is connected, we can modify the showSpeed method like
   below, to call the API when service connected, or call `connectToService` and wait for the service connection, post we
   are eligible to call any API.
