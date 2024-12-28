@@ -97,7 +97,7 @@ class SensorDataLoggerViewModel @Inject constructor(
     }
 
     fun showRpm() {
-        Toast.makeText(appContext, "RPM ${sensorDataLoggerService?.speedInKm}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(appContext, "RPM ${sensorDataLoggerService?.rpm}", Toast.LENGTH_SHORT).show()
     }
 
     private val sensorCallback = object : SensorDataCallback.Stub() {
