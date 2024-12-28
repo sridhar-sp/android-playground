@@ -30,6 +30,13 @@ interface IServiceConnector<T> {
     fun onServiceConnected() {}
 }
 
+/**
+ *
+ * @param context Context used to bind the service.
+ * @param intent Explicit intent describing the service to connect.
+ * @param transformBinderToService callback function called to transform the generic IBinder instance to the client specific AIDL interface.
+ * @param allowNullBinding Pass true to indicate to keep the server connected even if the server returns null IBinder instance from onBind method.
+ */
 open class ServiceConnector<T>(
     private val context: Context,
     private val intent: Intent,
