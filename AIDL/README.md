@@ -1,4 +1,6 @@
-## Android IPC (using AIDL)
+# Android IPC (using AIDL)
+
+## Quick guide to AIDL.
 
 ### What's AIDL
 
@@ -14,15 +16,18 @@ AIDL supports all java primitive data types and handful of wrapper data types, s
 
 ### What we are going to build
 
-We are going to build two apps, one is a data provider or we can call it as server, other is consumer app or client
+To demonstrate AIDL in action, we'll build a practical example: a sensor data logging system consisting of two
+applications:
 
-### Server
+### Server App: A service that reads various sensors and provides APIs to:
 
-* Assume we have a app which reads various sensors periodically, and has apis to fetch any sensor value and register a
-  callback to be invoked when any sensor value changed
+* Fetch real-time sensor values
+* Register callbacks for sensor value changes
+* Manage logging sessions
 
-### Client
+### Client App:
 
+* Connects to the server app and consumes the sensor data
 * Client app will connect to the Server App, by binding with the Service, once bind complete we get a binder object
   which is the implementation of the AIDL interface we both app agreed on. using this binder we can call the API exposed
   from Server app
