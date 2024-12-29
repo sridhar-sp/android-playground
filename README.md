@@ -3,3 +3,4 @@ This repo contains sample application I've created as part of exploring new feat
 
 * [Glance](https://github.com/sridhar-sp/android-playground/tree/main/Glance) - Featured on [Google dev library](https://devlibrary.withgoogle.com/authors/sridhar-sp)
 * [IPC using AIDL](https://github.com/sridhar-sp/android-playground/tree/main/AIDL)
+* [Android Test](https://github.com/sridhar-sp/android-test)
