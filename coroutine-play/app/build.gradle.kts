@@ -7,10 +7,10 @@ plugins {
 }
 
 android {
-    namespace = AppConfig.namespace
+    namespace = "com.droidstarter"
 
     defaultConfig {
-        applicationId = AppConfig.applicationId
+        applicationId = "com.droidstarter"
         versionCode = 1
         versionName = "1.0"
 
