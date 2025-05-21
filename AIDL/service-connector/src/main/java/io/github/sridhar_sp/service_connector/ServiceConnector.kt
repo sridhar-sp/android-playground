@@ -105,9 +105,14 @@ open class ServiceConnector<T>(
         }
 
         logD("Initiating bind service connection")
-        context.bindService(
+        val status = context.bindService(
             intent, serviceConnection, Context.BIND_AUTO_CREATE
         )
+
+        if (!status) {
+            Log.e(logTag, "bindService failed, please check the intent provided.")
+            if (continuation.isActive) continuation.resume(null)
+        }
 
         lastServiceConnection = serviceConnection
     }
