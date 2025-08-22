@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.droidstarter.Instrumentation
 import com.droidstarter.InstrumentationImpl
 import com.droidstarter.logD
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -199,6 +200,10 @@ class HomeViewModel : ViewModel() {
             viewModelScope.launch {
                 downloadedImage = downloadImageUsingCoroutine(IMG_URL)
             }
+
+//            CoroutineScope(Dispatchers.IO).launch {
+//                downloadedImage = downloadImageUsingCoroutine(IMG_URL)
+//            }
         } else {
             executors.submit {
                 downloadedImage = downloadImageUsingThread(IMG_URL)
@@ -283,23 +288,23 @@ class HomeViewModel : ViewModel() {
             } as HttpURLConnection
             connection.doInput = true
 
-            downloadInstrumentation.log(sessionKey, "Calling connect")
+            downloadInstrumentation.log(sessionKey, "Calling connect ${Thread.currentThread()}")
             withContext(Dispatchers.IO) {
                 connection.connect()
             } // Connect to the server
-            downloadInstrumentation.log(sessionKey, "Connection established")
+            downloadInstrumentation.log(sessionKey, "Connection established ${Thread.currentThread()}")
 
-            downloadInstrumentation.log(sessionKey, "Obtaining input stream")
+            downloadInstrumentation.log(sessionKey, "Obtaining input stream ${Thread.currentThread()}")
             inputStream = withContext(Dispatchers.IO) {
                 connection.inputStream
             }
-            downloadInstrumentation.log(sessionKey, "Input stream obtained")
+            downloadInstrumentation.log(sessionKey, "Input stream obtained ${Thread.currentThread()}")
 
             downloadInstrumentation.log(sessionKey, "Decoding input stream to bitmap")
             bitmap = withContext(Dispatchers.IO) {
                 BitmapFactory.decodeStream(inputStream)
             }
-            downloadInstrumentation.log(sessionKey, "Bitmap decoding complete")
+            downloadInstrumentation.log(sessionKey, "Bitmap decoding complete ${Thread.currentThread()}")
 
         } catch (e: Exception) {
             e.printStackTrace() // Log the exception
