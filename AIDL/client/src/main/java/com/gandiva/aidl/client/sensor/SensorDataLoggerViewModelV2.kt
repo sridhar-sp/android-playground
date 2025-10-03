@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.gandiva.aidl.remoteservices.SensorDataCallback
 import com.gandiva.aidl.remoteservices.model.SensorData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.sridhar_sp.service_connector.IServiceConnector
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,6 +32,17 @@ class SensorDataLoggerViewModelV2 @Inject constructor(
         private set
 
     var sensorLogs by mutableStateOf("")
+
+    init {
+        viewModelScope.launch {
+            sensorDataLoggerServiceCoordinator.serviceConnectionStatus()
+                .collect { status: IServiceConnector.ServiceConnectionStatus ->
+                    Toast.makeText(
+                        appContext, "Service Status: ${status.javaClass.simpleName}", Toast.LENGTH_SHORT
+                    ).show()
+                }
+        }
+    }
 
     fun disconnectService() {
         viewModelScope.launch { sensorDataLoggerServiceCoordinator.unbindService() }

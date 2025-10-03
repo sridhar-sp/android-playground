@@ -6,6 +6,12 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -27,7 +33,15 @@ interface IServiceConnector<T> {
 
     suspend fun unbindService()
 
-    fun onServiceConnected() {}
+    fun serviceConnectionStatus(): Flow<ServiceConnectionStatus>
+
+    sealed class ServiceConnectionStatus {
+        object None : ServiceConnectionStatus()
+        object Connected : ServiceConnectionStatus()
+        object Disconnected : ServiceConnectionStatus()
+        object NullBinding : ServiceConnectionStatus()
+        object BindingDied : ServiceConnectionStatus()
+    }
 }
 
 /**
@@ -52,7 +66,17 @@ open class ServiceConnector<T>(
 
     private var lastServiceConnection: ServiceConnection? = null
 
+    private var _serviceConnectionStatusFlow: MutableStateFlow<IServiceConnector.ServiceConnectionStatus> =
+        MutableStateFlow(IServiceConnector.ServiceConnectionStatus.None)
+
+    private val serviceConnectionStatusFlow = _serviceConnectionStatusFlow.asStateFlow()
+
     private val logTag = "Service :: ${this.javaClass}"
+
+    override fun serviceConnectionStatus(): Flow<IServiceConnector.ServiceConnectionStatus> =
+        serviceConnectionStatusFlow
+
+    private val ioScope = CoroutineScope(Dispatchers.IO)
 
     override suspend fun getService(timeOutInMillis: Long): T? {
         // If allowNullBinding is true don't care what service object is
@@ -60,8 +84,7 @@ open class ServiceConnector<T>(
             return service
         }
 
-        if (timeOutInMillis < 0)
-            return mutex.withLock { bindAndGetService() }
+        if (timeOutInMillis < 0) return mutex.withLock { bindAndGetService() }
         return mutex.withLock { withTimeoutOrNull(timeOutInMillis) { bindAndGetService() } }
     }
 
@@ -70,16 +93,19 @@ open class ServiceConnector<T>(
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
                 resumeWithServiceInstance(binder)
                 logD("service connected")
+                ioScope.launch { _serviceConnectionStatusFlow.emit(IServiceConnector.ServiceConnectionStatus.Connected) }
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 cleanUpAndResumeIfRequired()
                 logD("service disconnected")
+                ioScope.launch { _serviceConnectionStatusFlow.emit(IServiceConnector.ServiceConnectionStatus.Disconnected) }
             }
 
             override fun onBindingDied(name: ComponentName?) {
                 cleanUpAndResumeIfRequired()
                 logD("service onBindingDied")
+                ioScope.launch { _serviceConnectionStatusFlow.emit(IServiceConnector.ServiceConnectionStatus.BindingDied) }
             }
 
             override fun onNullBinding(name: ComponentName?) {
@@ -87,13 +113,13 @@ open class ServiceConnector<T>(
                 else cleanUpAndResumeIfRequired()
 
                 logD("service onNullBinding")
+                ioScope.launch { _serviceConnectionStatusFlow.emit(IServiceConnector.ServiceConnectionStatus.NullBinding) }
             }
 
             private fun resumeWithServiceInstance(binder: IBinder?) {
                 service = transformBinderToService(binder)
                 serviceConnected = true
                 if (continuation.isActive) continuation.resume(service)
-                onServiceConnected()
             }
 
             private fun cleanUpAndResumeIfRequired() {
