@@ -1,5 +1,5 @@
 [versions]
-agp = "8.2.2"
+agp = "8.10.0"
 androidGradlePlugin = "8.0.2"
 glide = "4.16.0"
 org-jetbrains-kotlin-android = "1.9.20"
@@ -30,6 +30,7 @@ androidxMedia = "1.7.0"
 constraintlayoutCompose = "1.0.1"
 roomVersion = "2.6.1"
 gson = "2.10.1"
+jreleaser = "1.22.0"
 
 
 [libraries]
@@ -77,3 +78,4 @@ com-android-library = { id = "com.android.library", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
 org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+jreleaser = { id = "org.jreleaser", version.ref = "jreleaser" }
