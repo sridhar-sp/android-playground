@@ -31,7 +31,7 @@ constraintlayoutCompose = "1.0.1"
 roomVersion = "2.6.1"
 gson = "2.10.1"
 jreleaser = "1.22.0"
-
+dokka = "2.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidxCore" }
@@ -79,3 +79,4 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
 org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 jreleaser = { id = "org.jreleaser", version.ref = "jreleaser" }
+dokka = { id = "org.jetbrains.dokka" ,version.ref = "dokka"}

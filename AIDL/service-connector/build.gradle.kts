@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.android)
     id("maven-publish")
     id("org.jreleaser")
+    id("org.jetbrains.dokka")
 }
 
 android {
@@ -34,44 +35,13 @@ android {
     kotlin {
         jvmToolchain(17)
     }
-    sourceSets {
-        getByName("main") {
-            java.srcDirs("src/main/java", "src/main/kotlin")
-            res.srcDirs("src/main/res")
-            manifest.srcFile("src/main/AndroidManifest.xml")
+
+    publishing { // Configure what goes in SoftwareComponent, this will be used by the maven-publish
+        singleVariant("release") {
+            withJavadocJar() // Along with .aar this doc jar file can be retrieved using components("release")
+            withSourcesJar()
         }
     }
-}
-
-// Task to generate Javadoc
-tasks.register<Javadoc>("androidJavadoc") {
-    source = android.sourceSets.getByName("main").java.getSourceFiles()
-    classpath += project.files(android.bootClasspath.joinToString(File.pathSeparator))
-    android.libraryVariants.all {
-        if (name == "release") {
-            classpath += javaCompileProvider.get().classpath
-            println("**** Variant classpath: ${classpath.joinToString()}")
-        }
-    }
-
-    if (JavaVersion.current().isJava9Compatible) {
-        (options as StandardJavadocDocletOptions).addBooleanOption("html5", true)
-    }
-
-    exclude("**/R.html", "**/R.*.html", "**/index.html")
-}
-
-// Task to generate Javadoc JAR
-tasks.register<Jar>("androidJavadocJar") {
-    dependsOn("androidJavadoc")
-    archiveClassifier.set("javadoc")
-    from(tasks.named<Javadoc>("androidJavadoc").get().destinationDir)
-}
-
-// Task to generate Sources JAR
-tasks.register<Jar>("androidSourcesJar") {
-    archiveClassifier.set("sources")
-    from(android.sourceSets.getByName("main").java.srcDirs)
 }
 
 afterEvaluate {
@@ -83,7 +53,6 @@ afterEvaluate {
 
                 // Add source and javadoc artifacts
 //                artifact(tasks.named("androidSourcesJar"))
-                artifact(tasks.named("androidJavadocJar"))
 
                 groupId = "io.github.sridhar-sp"
                 artifactId = "aidl-service-connector"
@@ -128,16 +97,6 @@ afterEvaluate {
     }
 }
 
-buildscript {
-    configurations.all {
-        resolutionStrategy {
-//            force("org.apache.commons:commons-compress:1.22")
-        }
-    }
-}
-
-
-// FIX: Correct JReleaser configuration for Maven Central
 jreleaser {
     gitRootSearch.set(true)
     project {
@@ -170,7 +129,7 @@ jreleaser {
 
     deploy {
         maven {
-            mavenCentral{
+            mavenCentral {
                 create("maven-central") {
                     active.set(org.jreleaser.model.Active.ALWAYS)
                     url.set("https://central.sonatype.com/api/v1/publisher")

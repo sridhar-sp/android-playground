@@ -30,14 +30,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     kotlin {
-        jvmToolchain(11)
+        jvmToolchain(17)
     }
     buildFeatures {
         compose = true
@@ -66,7 +66,8 @@ dependencies {
     kapt(libs.dagger.hilt.compiler)
 
     implementation(files("libs/remoteServices.aar"))
-    implementation(project(":service-connector"))
+//    implementation(project(":service-connector"))
+    implementation("io.github.sridhar-sp:aidl-service-connector:0.1.0")
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit4)

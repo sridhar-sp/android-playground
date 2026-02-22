@@ -37,6 +37,7 @@ class SensorDataLoggerViewModelV2 @Inject constructor(
         viewModelScope.launch {
             sensorDataLoggerServiceCoordinator.serviceConnectionStatus()
                 .collect { status: IServiceConnector.ServiceConnectionStatus ->
+                    Log.d(TAG, "*** ServiceConnectionStatus $status")
                     Toast.makeText(
                         appContext, "Service Status: ${status.javaClass.simpleName}", Toast.LENGTH_SHORT
                     ).show()
