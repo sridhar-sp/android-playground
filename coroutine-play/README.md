@@ -19,6 +19,10 @@ Coroutine context hold a map of elements, accessed by Key
 
 Thread.stop from Java 1.0 and soon deprecated in next release in favour of cancel ( reconfirm this point)
 
+What is Thread.park ; how Executor service keeps the thread alive and idel without wasting CPU cycle
+
+What is a Thread ; how much memory it will need to create a Thread in Java; Different Thread in software like Application Thread ; OS Thread; Kernal Thread
+
 suspendCoroutine and suspendCancellableCoroutine
 
 Read about CSP style
