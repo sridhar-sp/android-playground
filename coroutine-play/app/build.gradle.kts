@@ -44,6 +44,9 @@ dependencies {
 //    implementation(libs.timber)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    implementation("io.ktor:ktor-client-core:2.3.7")
+    implementation("io.ktor:ktor-client-cio:2.3.7")
+
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit4)
