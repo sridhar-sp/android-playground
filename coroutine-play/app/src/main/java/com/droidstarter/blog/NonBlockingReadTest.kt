@@ -19,7 +19,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 
-val client = HttpClient(CIO)
+private val client = HttpClient(CIO)
 
 private suspend fun makeNonBlockingRequest(taskName: String): String {
     val response = client.get("https://httpbin.org/get")
