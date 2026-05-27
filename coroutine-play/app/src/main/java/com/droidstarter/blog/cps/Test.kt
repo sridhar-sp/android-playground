@@ -4,6 +4,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 
 private val client = HttpClient(CIO)
 
@@ -12,7 +18,15 @@ private suspend fun dummyNetworkCall(input: String): String {
     return input + response.bodyAsText()
 }
 
+//suspend fun main() {
+//    val response = dummyNetworkCall("hello")
+//    println("dummyNetworkCall Response $response")
+//}
+
+
 suspend fun main() {
-    val response = dummyNetworkCall("hello")
-    println("dummyNetworkCall Response $response")
+
+    yield()
+
 }
+
