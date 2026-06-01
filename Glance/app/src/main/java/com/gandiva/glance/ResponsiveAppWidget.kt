@@ -9,7 +9,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.*
+import androidx.glance.Button
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.LocalSize
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
 import androidx.glance.appwidget.GlanceAppWidget
@@ -17,7 +20,15 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
-import androidx.glance.layout.*
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
@@ -33,25 +44,21 @@ class ResponsiveAppWidget : GlanceAppWidget {
         Log.d("**** Widget", "ResponsiveAppWidget ()")
     }
 
-    companion object {
-        private val SMALL_BOX = DpSize(90.dp, 90.dp)
-        private val BIG_BOX = DpSize(180.dp, 180.dp)
-        private val VERY_BIG_BOX = DpSize(300.dp, 300.dp)
-        private val ROW = DpSize(180.dp, 48.dp)
-        private val LARGE_ROW = DpSize(300.dp, 48.dp)
-        private val COLUMN = DpSize(48.dp, 180.dp)
-        private val LARGE_COLUMN = DpSize(48.dp, 300.dp)
-    }
-
     override val sizeMode = SizeMode.Responsive(
         setOf(SMALL_BOX, BIG_BOX, ROW, LARGE_ROW, COLUMN, LARGE_COLUMN)
     )
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        provideContent {
+            Content()
+        }
+    }
 
 //    override val sizeMode: SizeMode
 //        get() = SizeMode.Exact
 
     @Composable
-    override fun Content() {
+    fun Content() {
         Log.d("**** Responsive Widget", "Responsive Content()")
 
         // Content will be called for each of the provided sizes
@@ -76,6 +83,16 @@ class ResponsiveAppWidget : GlanceAppWidget {
             VERY_BIG_BOX -> SimpleText(LocalSize.current, "VERY_BIG_BOX")
             else -> SimpleText(LocalSize.current, "ELSE ")
         }
+    }
+
+    companion object {
+        private val SMALL_BOX = DpSize(90.dp, 90.dp)
+        private val BIG_BOX = DpSize(180.dp, 180.dp)
+        private val VERY_BIG_BOX = DpSize(300.dp, 300.dp)
+        private val ROW = DpSize(180.dp, 48.dp)
+        private val LARGE_ROW = DpSize(300.dp, 48.dp)
+        private val COLUMN = DpSize(48.dp, 180.dp)
+        private val LARGE_COLUMN = DpSize(48.dp, 300.dp)
     }
 }
 
@@ -138,7 +155,8 @@ private fun ResponsiveBox(numItems: Int) {
             val index = numItems - it + 1
             val color = boxColors[(index - 1) % boxColors.size]
             val boxSize = (size.width * index) / numItems
-            ContentItem("$index",
+            ContentItem(
+                "$index",
                 color,
                 GlanceModifier.size(boxSize),
                 textStyle = TextStyle(textAlign = TextAlign.End).takeIf { numItems != 1 }
@@ -169,7 +187,7 @@ private fun ContentItem(
 }
 
 class ResponsiveAction : ActionCallback {
-    override suspend fun onRun(
+    override suspend fun onAction(
         context: Context,
         glanceId: GlanceId,
         parameters: ActionParameters

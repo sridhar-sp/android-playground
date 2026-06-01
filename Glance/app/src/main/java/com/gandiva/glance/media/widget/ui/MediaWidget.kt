@@ -5,6 +5,8 @@ import android.content.Intent
 import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
@@ -13,7 +15,13 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.IconCompat
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.glance.*
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.IconImageProvider
+import androidx.glance.Image
+import androidx.glance.ImageProvider
+import androidx.glance.LocalContext
+import androidx.glance.LocalSize
 import androidx.glance.action.Action
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionParametersOf
@@ -23,7 +31,23 @@ import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.cornerRadius
-import androidx.glance.layout.*
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.currentState
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
+import androidx.glance.layout.Column
+import androidx.glance.layout.ContentScale
+import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxHeight
+import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
+import androidx.glance.layout.width
+import androidx.glance.layout.wrapContentSize
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
@@ -32,6 +56,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.gandiva.glance.MainActivity
 import com.gandiva.glance.R
+import com.gandiva.glance.media.widget.manager.MediaWidgetManager
 import com.gandiva.glance.media.widget.manager.MediaWidgetManagerImpl
 import com.gandiva.glance.media.widget.ui.MediaActionHandler.Companion.sendMediaAction
 import java.io.Serializable
@@ -40,24 +65,25 @@ import java.io.Serializable
 /**
  * Implementation of App Widget functionality.
  */
-class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiLayout = R.layout.media_widget_error) {
-
-    init {
-        Log.d("MediaWidget ", "MediaWidget constructor arg $widgetData")
-    }
-
-    companion object {
-        val PREF_IS_DARK_THEME_KEY = booleanPreferencesKey("isDarkTheme")
-    }
+class MediaWidget(private val widgetManager: MediaWidgetManager) :
+    GlanceAppWidget(errorUiLayout = R.layout.media_widget_error) {
 
     override val sizeMode = SizeMode.Exact
 
     override val stateDefinition: GlanceStateDefinition<Preferences> = PreferencesGlanceStateDefinition
 
-    @Composable
-    override fun Content() {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        Log.d("MediaWidget", "provideGlance id $id")
+        provideContent {
+            val isDarkTheme = currentState(key = PREF_IS_DARK_THEME_KEY) ?: false
+            val widgetData = widgetManager.widgetData.collectAsState()
 
-        val isDarkTheme = currentState(key = PREF_IS_DARK_THEME_KEY) ?: false
+            key(isDarkTheme) { Content(isDarkTheme, widgetData.value) }
+        }
+    }
+
+    @Composable
+    fun Content(isDarkTheme: Boolean, widgetData: WidgetData) {
 
         WidgetTheme(darkTheme = isDarkTheme) {
             Box(
@@ -77,7 +103,7 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                             .height(LocalSize.current.height * .70f),
                     ) {
                         Image(
-                            provider = AndroidResourceImageProvider(widgetData.albumArt),
+                            provider = ImageProvider(widgetData.albumArt),
                             contentDescription = "large_album_art",
                             modifier = GlanceModifier.fillMaxWidth()
                                 .height(LocalSize.current.height * .55f),
@@ -109,7 +135,7 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                                         .padding(MediaWidgetTheme.dimens.contentPadding)
                                 ) {
                                     Image(
-                                        provider = AndroidResourceImageProvider(widgetData.albumArt),
+                                        provider = ImageProvider(widgetData.albumArt),
                                         contentDescription = "",
                                         modifier = GlanceModifier
                                             .fillMaxSize()
@@ -192,18 +218,31 @@ class MediaWidget(private val widgetData: WidgetData) : GlanceAppWidget(errorUiL
                 }
             }
         }
+    }
 
-
+    companion object {
+        val PREF_IS_DARK_THEME_KEY = booleanPreferencesKey("isDarkTheme")
     }
 }
 
 
 class MediaActionHandler : ActionCallback {
     sealed interface Command : Serializable {
-        object MediaPlayOrPause : Command
-        object MediaNext : Command
-        object MediaPrev : Command
-        object ToggleTheme : Command
+        data object MediaPlayOrPause : Command {
+            private fun readResolve(): Any = MediaPlayOrPause
+        }
+
+        data object MediaNext : Command {
+            private fun readResolve(): Any = MediaNext
+        }
+
+        data object MediaPrev : Command {
+            private fun readResolve(): Any = MediaPrev
+        }
+
+        data object ToggleTheme : Command {
+            private fun readResolve(): Any = ToggleTheme
+        }
     }
 
     companion object {
@@ -214,10 +253,13 @@ class MediaActionHandler : ActionCallback {
         )
     }
 
-    override suspend fun onRun(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
         val command = parameters[KEY_MEDIA_COMMAND]!!
-        Log.d("MediaWidget", "OnRun $command")
+        Log.d("MediaWidget", "onAction $command")
         val mediaWidgetManager = MediaWidgetManagerImpl.mediaWidgetManager
         when (command) {
             is Command.MediaPlayOrPause -> mediaWidgetManager.playOrPause()
@@ -294,20 +336,13 @@ fun ThemeToggleButton(isDarkTheme: Boolean) {
     )
 }
 
-class ThemeToggleActionCallback : ActionCallback {
-    override suspend fun onRun(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        Log.d("**** Widget", "ThemeToggleActionCallback glanceId $glanceId")
-//        MediaWidgetService.safeSendCommand(context, MediaWidgetService.Command.ToggleTheme)
-    }
-}
 
 class LaunchAppActionCallback : ActionCallback {
-    override suspend fun onRun(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         context.startActivity(
-            Intent(
-                context,
-                MainActivity::class.java
-            ).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })
+            Intent(context, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            })
     }
 
 }

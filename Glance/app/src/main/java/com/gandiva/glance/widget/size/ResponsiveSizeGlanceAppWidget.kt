@@ -1,16 +1,19 @@
 package com.gandiva.glance.widget.size
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalSize
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.provideContent
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.fillMaxSize
@@ -21,29 +24,6 @@ import androidx.glance.unit.FixedColorProvider
 
 class ResponsiveSizeGlanceAppWidget : GlanceAppWidget() {
 
-    companion object {
-        val TINY_BOX = DpSize(110.dp, 110.dp)
-        val SMALL_BOX = DpSize(210.dp, 110.dp)
-        val SMALL_RECTANGLE = DpSize(330.dp, 110.dp)
-        val TINY_TALL_RECTANGLE = DpSize(110.dp, 310.dp)
-        val TALL_RECTANGLE = DpSize(210.dp, 310.dp)
-        val MEDIUM_BOX = DpSize(330.dp, 310.dp)
-        val BIG_RECTANGLE = DpSize(330.dp, 410.dp)
-
-        fun getSizeString(width: Dp, height: Dp): String {
-            return when (DpSize(width, height)) {
-                TINY_BOX -> "Tiny box"
-                SMALL_BOX -> "Small box"
-                SMALL_RECTANGLE -> "Small rectangle"
-                MEDIUM_BOX -> "Medium box"
-                BIG_RECTANGLE -> "Big rectangle"
-                TALL_RECTANGLE -> "Tall rectangle"
-                TINY_TALL_RECTANGLE -> "Tint tall rectangle"
-                else -> "Unknown size"
-            }
-        }
-    }
-
     override val sizeMode: SizeMode
         get() = SizeMode.Responsive(
             setOf(
@@ -52,8 +32,12 @@ class ResponsiveSizeGlanceAppWidget : GlanceAppWidget() {
             )
         )
 
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        provideContent { Content() }
+    }
+
     @Composable
-    override fun Content() {
+    fun Content() {
         Box(
             modifier = GlanceModifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -78,6 +62,29 @@ class ResponsiveSizeGlanceAppWidget : GlanceAppWidget() {
 
     @Composable
     private fun getSizeText() = getSizeString(LocalSize.current.width, LocalSize.current.height)
+
+    companion object {
+        val TINY_BOX = DpSize(110.dp, 110.dp)
+        val SMALL_BOX = DpSize(210.dp, 110.dp)
+        val SMALL_RECTANGLE = DpSize(330.dp, 110.dp)
+        val TINY_TALL_RECTANGLE = DpSize(110.dp, 310.dp)
+        val TALL_RECTANGLE = DpSize(210.dp, 310.dp)
+        val MEDIUM_BOX = DpSize(330.dp, 310.dp)
+        val BIG_RECTANGLE = DpSize(330.dp, 410.dp)
+
+        fun getSizeString(width: Dp, height: Dp): String {
+            return when (DpSize(width, height)) {
+                TINY_BOX -> "Tiny box"
+                SMALL_BOX -> "Small box"
+                SMALL_RECTANGLE -> "Small rectangle"
+                MEDIUM_BOX -> "Medium box"
+                BIG_RECTANGLE -> "Big rectangle"
+                TALL_RECTANGLE -> "Tall rectangle"
+                TINY_TALL_RECTANGLE -> "Tint tall rectangle"
+                else -> "Unknown size"
+            }
+        }
+    }
 }
 
 class ResponsiveSizeGlanceAppWidgetReceiver : GlanceAppWidgetReceiver() {

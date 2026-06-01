@@ -16,14 +16,106 @@ import com.gandiva.glance.media.widget.ui.MediaWidget
 import com.gandiva.glance.media.widget.ui.WidgetData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import kotlin.coroutines.suspendCoroutine
 
 class MediaWidgetManager(private val appContext: Context) {
+
+
+    private val backgroundScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
+
+    private var mediaPlayerService: IMediaPlayerService? = null
+
+    private val mediaPlayerServiceConnection = ServiceConnectionImpl()
+
+    val widgetData = MutableStateFlow<WidgetData>(defaultWidgetData())
+
+    fun bindWithMediaPlayerService(context: Context) {
+//        backgroundScope.launch { getOrInitMediaPlayerService(context.applicationContext) }
+    }
+
+    fun unbindWithMediaPlayerService(context: Context) {
+        appContext.unbindService(mediaPlayerServiceConnection)
+    }
+
+    private fun initializeMediaPlayerService(service: IMediaPlayerService) {
+        mediaPlayerService = service
+        listenForMediaChangeUpdate()
+    }
+
+    private suspend fun getOrInitMediaPlayerService() = suspendCoroutine<IMediaPlayerService> { c ->
+        if (mediaPlayerService != null) {
+            c.resumeWith(Result.success(mediaPlayerService!!))
+        } else {
+            mediaPlayerServiceConnection.onServiceConnected = {
+                log("IMediaPlayerService onServiceConnected")
+                val mediaService =
+                    (it as MediaPlayerService.MediaPlayerLocalBinder).getMediaPlayerService()
+                initializeMediaPlayerService(mediaService)
+                c.resumeWith(Result.success(mediaService))
+            }
+            appContext.bindService(
+                Intent(appContext, MediaPlayerService::class.java),
+                mediaPlayerServiceConnection,
+                Context.BIND_AUTO_CREATE
+            )
+        }
+    }
+
+    private fun listenForMediaChangeUpdate() {
+        log("listenForMediaChangeUpdate")
+        backgroundScope.launch {
+            getOrInitMediaPlayerService().getMediaMetaDataFlow().onEach { mediaMetaData ->
+                widgetData.emit(
+                    WidgetData(
+                        mediaMetaData.title,
+                        formatTime(mediaMetaData.totalTimeInMillis),
+                        formatTime(mediaMetaData.currentTimeMillis),
+                        mediaMetaData.progress,
+                        mediaMetaData.isPlaying,
+                        mediaMetaData.albumArt,
+                    )
+                )
+                MediaWidget(this@MediaWidgetManager).updateAll(appContext)
+            }.launchIn(this)
+        }
+    }
+
+    fun playOrPause() {
+        log("playOrPause")
+        backgroundScope.launch {
+            log("playOrPause inside")
+            getOrInitMediaPlayerService().playOrPause()
+        }
+    }
+
+    fun next() {
+        backgroundScope.launch { getOrInitMediaPlayerService().next() }
+    }
+
+    fun prev() {
+        backgroundScope.launch { getOrInitMediaPlayerService().prev() }
+    }
+
+    fun toggleTheme(glanceId: GlanceId) {
+        backgroundScope.launch {
+            val currentMedia = getOrInitMediaPlayerService().getCurrentMedia()
+            // theme info can be passed to [this@MediaWidgetManager] just like [this@MediaWidgetManager.widgetData],
+            // just wanted to show-case updateAppWidgetState as well.
+            updateAppWidgetState(appContext, glanceId) { pref ->
+                pref[MediaWidget.PREF_IS_DARK_THEME_KEY] = pref[MediaWidget.PREF_IS_DARK_THEME_KEY]?.not() ?: false
+            }
+            widgetData.emit(mediaMetaDataToWidgetData(currentMedia))
+            MediaWidget(this@MediaWidgetManager).update(appContext, glanceId)
+        }
+    }
 
     companion object {
 
@@ -53,91 +145,6 @@ class MediaWidgetManager(private val appContext: Context) {
             )
         }
     }
-
-    private val backgroundScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
-
-    private var mediaPlayerService: IMediaPlayerService? = null
-
-    private val mediaPlayerServiceConnection = ServiceConnectionImpl()
-
-    fun bindWithMediaPlayerService(context: Context) {
-//        backgroundScope.launch { getOrInitMediaPlayerService(context.applicationContext) }
-    }
-
-    fun unbindWithMediaPlayerService(context: Context) {
-        appContext.unbindService(mediaPlayerServiceConnection)
-    }
-
-    private fun initializeMediaPlayerService(service: IMediaPlayerService) {
-        mediaPlayerService = service
-        listenForMediaChangeUpdate()
-    }
-
-    private suspend fun getOrInitMediaPlayerService() = suspendCoroutine<IMediaPlayerService> { c ->
-        if (mediaPlayerService != null) {
-            log("Before resumeWith")
-            c.resumeWith(Result.success(mediaPlayerService!!))
-            log("After resumeWith")
-        } else {
-            mediaPlayerServiceConnection.onServiceConnected = {
-                log("IMediaPlayerService onServiceConnected")
-                val mediaService =
-                    (it as MediaPlayerService.MediaPlayerLocalBinder).getMediaPlayerService()
-                initializeMediaPlayerService(mediaService)
-                c.resumeWith(Result.success(mediaService))
-            }
-            appContext.bindService(
-                Intent(appContext, MediaPlayerService::class.java),
-                mediaPlayerServiceConnection,
-                Context.BIND_AUTO_CREATE
-            )
-        }
-    }
-
-    private fun listenForMediaChangeUpdate() {
-        log("listenForMediaChangeUpdate")
-        backgroundScope.launch {
-            getOrInitMediaPlayerService().getMediaMetaDataFlow().onEach { mediaMetaData ->
-                MediaWidget(
-                    WidgetData(
-                        mediaMetaData.title,
-                        formatTime(mediaMetaData.totalTimeInMillis),
-                        formatTime(mediaMetaData.currentTimeMillis),
-                        mediaMetaData.progress,
-                        mediaMetaData.isPlaying,
-                        mediaMetaData.albumArt,
-                    )
-                ).updateAll(appContext)
-            }.launchIn(this)
-        }
-    }
-
-    fun playOrPause() {
-        log("playOrPause")
-        backgroundScope.launch {
-            log("playOrPause inside")
-            getOrInitMediaPlayerService().playOrPause()
-        }
-    }
-
-    fun next() {
-        backgroundScope.launch { getOrInitMediaPlayerService().next() }
-    }
-
-    fun prev() {
-        backgroundScope.launch { getOrInitMediaPlayerService().prev() }
-    }
-
-    fun toggleTheme(glanceId: GlanceId) {
-        backgroundScope.launch {
-            val currentMedia = getOrInitMediaPlayerService().getCurrentMedia()
-            updateAppWidgetState(appContext, glanceId) { pref ->
-                pref[MediaWidget.PREF_IS_DARK_THEME_KEY] = pref[MediaWidget.PREF_IS_DARK_THEME_KEY]?.not() ?: false
-            }
-            MediaWidget(mediaMetaDataToWidgetData(currentMedia)).update(appContext, glanceId)
-        }
-    }
-
 }
 
 private fun log(log: String) {
