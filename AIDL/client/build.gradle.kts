@@ -67,7 +67,7 @@ dependencies {
 
     implementation(files("libs/remoteServices.aar"))
 //    implementation(project(":service-connector"))
-    implementation("io.github.sridhar-sp:aidl-service-connector:0.1.0")
+    implementation("io.github.sridhar-sp:aidl-service-connector:0.2.0")
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit4)
